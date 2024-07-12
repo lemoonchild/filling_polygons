@@ -33,7 +33,20 @@ fn main() {
     fb.fill_polygon(&vertices_polygon1, Color::from_hex(0xFFFF00)); // Amarillo para el relleno
     fb.set_current_color(0xFFFFFF); // Blanco para el contorno
     fb.draw_polygon(&vertices_polygon1);
-    
+
+    // Coordenadas del polígono 2
+    let vertices_polygon2 = vec![
+        Vertex::new(321.0, 335.0),
+        Vertex::new(288.0, 286.0),
+        Vertex::new(339.0, 251.0),
+        Vertex::new(374.0, 302.0),
+    ];
+
+    // Rellena y dibuja el polígono 2
+    fb.fill_polygon(&vertices_polygon2, Color::from_hex(0x0000FF)); // Azul para el relleno
+    fb.set_current_color(0xFFFFFF); // Blanco para el contorno
+    fb.draw_polygon(&vertices_polygon2);
+
     // Guarda el resultado en un archivo BMP
     fb.render_buffer("output.bmp").unwrap();
 }
