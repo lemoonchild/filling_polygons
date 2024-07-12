@@ -6,6 +6,7 @@ pub trait Line {
     fn line(&mut self, start: Vertex, end: Vertex);
     fn draw_polygon(&mut self, points: &[Vertex]);
     fn fill_polygon(&mut self, points: &[Vertex], color: Color);
+    fn fill_polygon_with_hole(&mut self, outer_points: &[Vertex], inner_points: &[Vertex], color: Color);
 }
 
 impl Line for Framebuffer {
@@ -57,29 +58,76 @@ impl Line for Framebuffer {
 
         self.set_current_color(color.to_hex());
 
-        // Determina los límites verticales del polígono
         let min_y = points.iter().min_by(|a, b| a.point.y.partial_cmp(&b.point.y).unwrap()).unwrap().point.y as usize;
         let max_y = points.iter().max_by(|a, b| a.point.y.partial_cmp(&b.point.y).unwrap()).unwrap().point.y as usize;
 
-        // Procesar cada scanline desde min_y hasta max_y
         for y in min_y..=max_y {
-            let mut node_x: Vec<usize> = Vec::new(); // Puntos de intersección x de la scanline
+            let mut node_x: Vec<usize> = Vec::new();
 
-            // Revisa cada arista del polígono
             let mut j = points.len() - 1;
             for i in 0..points.len() {
                 let point1 = points[i];
                 let point2 = points[j];
 
                 if (point1.point.y < y as f32 && point2.point.y >= y as f32) || (point2.point.y < y as f32 && point1.point.y >= y as f32) {
-                    // Calcular la posición x de la intersección de la arista con la scanline
                     let x = (point1.point.x + (y as f32 - point1.point.y) / (point2.point.y - point1.point.y) * (point2.point.x - point1.point.x)) as usize;
                     node_x.push(x);
                 }
                 j = i;
             }
 
-            node_x.sort(); // Ordenar los puntos de intersección
+            node_x.sort();
+
+            for i in (0..node_x.len()).step_by(2) {
+                if i + 1 < node_x.len() {
+                    for x in node_x[i]..=node_x[i + 1] {
+                        self.point(x, y);
+                    }
+                }
+            }
+        }
+    }
+
+    fn fill_polygon_with_hole(&mut self, outer_points: &[Vertex], inner_points: &[Vertex], color: Color) {
+        if outer_points.len() < 3 || inner_points.len() < 3 { return; }
+
+        self.set_current_color(color.to_hex());
+
+        let min_y = outer_points.iter().chain(inner_points.iter())
+            .min_by(|a, b| a.point.y.partial_cmp(&b.point.y).unwrap()).unwrap().point.y as usize;
+        let max_y = outer_points.iter().chain(inner_points.iter())
+            .max_by(|a, b| a.point.y.partial_cmp(&b.point.y).unwrap()).unwrap().point.y as usize;
+
+        for y in min_y..=max_y {
+            let mut node_x: Vec<usize> = Vec::new();
+
+            // Revisa cada arista del polígono exterior
+            let mut j = outer_points.len() - 1;
+            for i in 0..outer_points.len() {
+                let point1 = outer_points[i];
+                let point2 = outer_points[j];
+
+                if (point1.point.y < y as f32 && point2.point.y >= y as f32) || (point2.point.y < y as f32 && point1.point.y >= y as f32) {
+                    let x = (point1.point.x + (y as f32 - point1.point.y) / (point2.point.y - point1.point.y) * (point2.point.x - point1.point.x)) as usize;
+                    node_x.push(x);
+                }
+                j = i;
+            }
+
+            // Revisa cada arista del polígono interior (agujero)
+            let mut j = inner_points.len() - 1;
+            for i in 0..inner_points.len() {
+                let point1 = inner_points[i];
+                let point2 = inner_points[j];
+
+                if (point1.point.y < y as f32 && point2.point.y >= y as f32) || (point2.point.y < y as f32 && point1.point.y >= y as f32) {
+                    let x = (point1.point.x + (y as f32 - point1.point.y) / (point2.point.y - point1.point.y) * (point2.point.x - point1.point.x)) as usize;
+                    node_x.push(x);
+                }
+                j = i;
+            }
+
+            node_x.sort();
 
             // Rellena los píxeles entre pares de intersecciones
             for i in (0..node_x.len()).step_by(2) {
@@ -92,4 +140,3 @@ impl Line for Framebuffer {
         }
     }
 }
-
