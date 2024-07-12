@@ -47,6 +47,18 @@ fn main() {
     fb.set_current_color(0xFFFFFF); // Blanco para el contorno
     fb.draw_polygon(&vertices_polygon2);
 
+    // Coordenadas del polígono 3
+    let vertices_polygon3 = vec![
+        Vertex::new(377.0, 249.0),
+        Vertex::new(411.0, 197.0),
+        Vertex::new(436.0, 249.0),
+    ];
+
+    // Rellena y dibuja el polígono 3
+    fb.fill_polygon(&vertices_polygon3, Color::from_hex(0xFF0000)); // Rojo para el relleno
+    fb.set_current_color(0xFFFFFF); // Blanco para el contorno
+    fb.draw_polygon(&vertices_polygon3);
+
     // Guarda el resultado en un archivo BMP
     fb.render_buffer("output.bmp").unwrap();
 }
