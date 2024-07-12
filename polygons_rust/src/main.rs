@@ -59,6 +59,42 @@ fn main() {
     fb.set_current_color(0xFFFFFF); // Blanco para el contorno
     fb.draw_polygon(&vertices_polygon3);
 
+    // Coordenadas del polígono 4
+    let vertices_polygon4 = vec![
+        Vertex::new(413.0, 177.0),
+        Vertex::new(448.0, 159.0),
+        Vertex::new(502.0, 88.0),
+        Vertex::new(553.0, 53.0),
+        Vertex::new(535.0, 36.0),
+        Vertex::new(676.0, 37.0),
+        Vertex::new(660.0, 52.0),
+        Vertex::new(750.0, 145.0),
+        Vertex::new(761.0, 179.0),
+        Vertex::new(672.0, 192.0),
+        Vertex::new(659.0, 214.0),
+        Vertex::new(615.0, 214.0),
+        Vertex::new(632.0, 230.0),
+        Vertex::new(580.0, 230.0),
+        Vertex::new(597.0, 215.0),
+        Vertex::new(552.0, 214.0),
+        Vertex::new(517.0, 144.0),
+        Vertex::new(466.0, 180.0),
+    ];
+
+    // Coordenadas del polígono 5 (agujero)
+    let vertices_polygon5 = vec![
+        Vertex::new(682.0, 175.0),
+        Vertex::new(708.0, 120.0),
+        Vertex::new(735.0, 148.0),
+        Vertex::new(739.0, 170.0),
+    ];
+
+    // Rellena y dibuja el polígono 4 con el polígono 5 como agujero
+    fb.fill_polygon_with_hole(&vertices_polygon4, &vertices_polygon5, Color::from_hex(0x00FF00)); // Verde para el relleno
+    fb.set_current_color(0xFFFFFF); // Blanco para el contorno
+    fb.draw_polygon(&vertices_polygon4);
+    fb.draw_polygon(&vertices_polygon5);
+
     // Guarda el resultado en un archivo BMP
     fb.render_buffer("output.bmp").unwrap();
 }
